@@ -1,6 +1,10 @@
 import pandas as pd
 
-df = pd.read_csv('shop.csv', sep=',', encoding='utf-8')
+shop = pd.read_csv("shop.csv")
+shop["order_date"] = pd.to_datetime(shop["order_date"].str.strip(), errors="coerce")
+shop = shop.drop_duplicates(subset="order_id")
 
-gender1 = df.loc[:,'gender':'total'].drop_duplicates() 
-print(gender1['gender'].value_counts())
+mask = shop["order_date"].dt.year.isin([2022, 2023])
+counts = shop.loc[mask, "gender"].value_counts()
+
+print(counts)

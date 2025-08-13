@@ -4,13 +4,24 @@
 
 import pandas as pd
 
-df = pd.read_csv('shop.csv', sep=',', encoding='utf-8')
+orders = pd.read_csv('orders.csv', sep=',', encoding='utf-8')
+customers = pd.read_csv('customers.csv', sep=',', encoding='utf-8')
+contacts = pd.read_csv('contacts.csv', sep=',', encoding='utf-8')
 
-df['registration_date'] = pd.to_datetime(df['registration_date'], errors='coerce')
-df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+df = customers.merge(contacts, on="customer_id", how="left") \
+.merge(orders, on="customer_id", how="inner")
 
-filter_df = df.query('registration_date.dt.year >= 2022 and order_date.dt.year == 2023 and total > 30000')[['first_name', 'last_name', 'total']]
-result = filter_df.shape[0]
+df["registration_date"] = pd.to_datetime(df["registration_date"].str.strip(), errors="coerce")
+df["order_date"] = pd.to_datetime(df["order_date"].str.strip(), errors="coerce")
 
-print(filter_df)
-print(result)
+mask = (
+(df["registration_date"].dt.year >= 2022) & 
+(df["order_date"].dt.year == 2023) & 
+(df["total"] > 30000)
+)
+
+filtered = df.loc[mask, ["first_name", "last_name", "total"]]
+count_sales = filtered.shape[0]
+
+print(filtered)
+print("Количество таких продаж:", count_sales)

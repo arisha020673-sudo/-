@@ -1,6 +1,9 @@
 import pandas as pd
 
 df = pd.read_csv('group_orders.csv', sep=',', encoding='utf-8')
+df_unique = df.drop_duplicates(subset="order_id")
 
-order_count = df.loc[:,'order_id':'total'].drop_duplicates() 
-print(order_count['city'].value_counts())
+counts = df_unique.groupby('city')['order_id'].count().reset_index()
+counts = counts.sort_values(by='order_id', ascending=True)
+
+print(counts)
